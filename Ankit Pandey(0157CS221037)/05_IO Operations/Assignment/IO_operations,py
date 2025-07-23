@@ -1,0 +1,108 @@
+#Assignment 
+'''1. Read the entire content from a text file and display it
+ Question
+Write a program to read the entire content from a .txt file and display it to the user.
+ Explanation
+You just need to open the file in read mode, read all its contents using read(), and print it.'''
+ #Python Code
+def read_full_file(filename):
+    try:
+        with open(filename, 'r') as file:
+            content = file.read()
+            print("File Content:\n", content)
+    except FileNotFoundError:
+        print("File not found.")
+
+# Example usage
+read_full_file("sample.txt")
+
+'''2. Read the first n lines from a text file
+ Question
+Write a program to read the first n lines from a .txt file. The value of n should be taken as input from the user.
+ Explanation
+You can use readlines() to get all lines as a list, then print the first n using slicing.'''
+#Python Code
+def read_first_n_lines(filename, n):
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+            print(f"First {n} lines:")
+            for line in lines[:n]:
+                print(line, end='')
+    except FileNotFoundError:
+        print("File not found.")
+
+# Example usage
+n = int(input("Enter number of lines to read: "))
+read_first_n_lines("sample.txt", n)
+
+'''3. Accept user input and append it to a text file
+ Question
+Wrte a program to accept input from the user and append it to a text file.
+ Explanation
+You open the file in append mode ('a') and write the user input at the end of the file.'''
+#Python Code
+def append_input_to_file(filename):
+    user_input = input("Enter text to append: ")
+    with open(filename, 'a') as file:
+        file.write(user_input + "\n")
+    print("Text appended successfully.")
+
+# Example usage
+append_input_to_file("sample.txt")
+
+''' 4. Read contents line by line and store each line into a list
+ Question
+Write a program to read contents from a .txt file line by line and store each line into a list.
+ Explanation
+You can use readlines() or a for loop to store each line in a list.'''
+#Python Code
+def file_to_list(filename):
+    try:
+        with open(filename, 'r') as file:
+            lines_list = [line.strip() for line in file]
+            print("Lines as list:")
+            print(lines_list)
+    except FileNotFoundError:
+        print("File not found.")
+
+# Example usage
+file_to_list("sample.txt")
+
+'''5. Find the longest word in the file
+ Question
+Write a program to find the longest word from the contents of a text file. Assume that there is only one longest word in the file.
+ Explanation
+Read the file, split it into words, and then find the word with maximum length using max() with key=len.'''
+#Python #Code
+def find_longest_word(filename):
+    try:
+        with open(filename, 'r') as file:
+            words = file.read().split()
+            longest = max(words, key=len)
+            print("Longest word:", longest)
+    except FileNotFoundError:
+        print("File not found.")
+
+# Example usage
+find_longest_word("sample.txt")
+
+'''6. Count the frequency of a user-entered word in the file
+ Question
+Write a program to count the frequency of a word entered by the user in a text file.
+ Explanation
+Read the file, split it into words, then count how many times the user word appears using .count().'''
+ #Python Code
+def count_word_frequency(filename):
+    word = input("Enter the word to count: ")
+    try:
+        with open(filename, 'r') as file:
+            content = file.read().split()
+            frequency = content.count(word)
+            print(f"The word '{word}' appears {frequency} times.")
+    except FileNotFoundError:
+        print("File not found.")
+
+# Example usage
+count_word_frequency("sample.txt")
+
