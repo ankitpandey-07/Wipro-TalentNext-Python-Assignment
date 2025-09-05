@@ -1,0 +1,99 @@
+# ==========================================================
+# Exercise: Data Preprocessing on Melbourne Housing Dataset
+# ==========================================================
+# Dataset Link: https://www.kaggle.com/datasets/gunjanpathak/melb-data/resource
+#
+# Objective:
+# Perform preprocessing on the 'melb_data.csv' dataset
+# with a focus on handling missing values, duplicates, and outliers,
+# and preparing it for further analysis or modeling.
+# ==========================================================
+
+# ==========================
+# Step 1: Import Libraries
+# ==========================
+import pandas as pd
+import numpy as np
+
+# ==========================
+# Step 2: Load the Dataset
+# ==========================
+# Make sure the 'melb_data.csv' file is in the same directory
+df = pd.read_csv("melb_data.csv")
+
+# Display initial shape and first few rows
+print("Initial Shape of Dataset:", df.shape)
+print("\nFirst 5 Rows of Dataset:\n", df.head())
+
+# ==========================
+# Step 3: Statistical Summary
+# ==========================
+print("\nStatistical Summary:\n", df.describe(include="all"))
+
+# ==========================
+# Step 4: Check Missing Values
+# ==========================
+print("\nMissing Values Count:\n", df.isnull().sum())
+
+# Handling Missing Values
+# - Numerical columns → fill with Median
+# - Categorical columns → fill with Mode
+for column in df.columns:
+    if df[column].dtype in ['int64', 'float64']:
+        df[column].fillna(df[column].median(), inplace=True)
+    else:
+        df[column].fillna(df[column].mode()[0], inplace=True)
+
+print("\nMissing Values After Filling:\n", df.isnull().sum())
+
+# ==========================
+# Step 5: Check for Duplicates
+# ==========================
+duplicate_count = df.duplicated().sum()
+print("\nDuplicate Rows Found:", duplicate_count)
+
+# Remove duplicates if any
+df.drop_duplicates(inplace=True)
+print("Shape After Removing Duplicates:", df.shape)
+
+# ==========================
+# Step 6: Outlier Detection and Removal
+# ==========================
+# Using IQR method to detect and remove outliers
+numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns
+
+def remove_outliers(data, column):
+    Q1 = data[column].quantile(0.25)
+    Q3 = data[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_limit = Q1 - 1.5 * IQR
+    upper_limit = Q3 + 1.5 * IQR
+    return data[(data[column] >= lower_limit) & (data[column] <= upper_limit)]
+
+# Applying outlier removal for each numeric column
+for col in numeric_columns:
+    before_shape = df.shape[0]
+    df = remove_outliers(df, col)
+    after_shape = df.shape[0]
+    print(f"Outliers removed from {col}: {before_shape - after_shape}")
+
+print("Shape After Outlier Removal:", df.shape)
+
+# ==========================
+# Step 7: Encoding Categorical Columns
+# ==========================
+# Convert categorical columns to numerical using one-hot encoding
+categorical_columns = df.select_dtypes(include=['object']).columns
+df_encoded = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
+
+print("Shape After Encoding:", df_encoded.shape)
+
+# ==========================
+# Step 8: Final Cleaned Data Overview
+# ==========================
+print("\nFinal Shape of Cleaned Dataset:", df_encoded.shape)
+print("\nCleaned DataFrame Preview:\n", df_encoded.head())
+
+# Save the cleaned dataset for future use
+df_encoded.to_csv("melb_data_cleaned.csv", index=False)
+print("\nCleaned dataset saved as 'melb_data_cleaned.csv'")

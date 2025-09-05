@@ -1,0 +1,168 @@
+# ==========================================================
+# Data Preprocessing with Statistical Perspective
+# Dataset: melb_data.csv
+# ==========================================================
+# Question:
+# 1. Load the dataset into a Pandas DataFrame.
+# 2. Perform statistical data preprocessing tasks:
+#    - Understand the dataset structure.
+#    - Check for missing values.
+#    - Handle missing data using statistical techniques.
+#    - Identify and treat duplicate rows.
+#    - Perform descriptive statistics to understand data distribution.
+#    - Detect and treat outliers using statistical methods.
+#    - Encode categorical variables if necessary.
+#
+# ----------------------------------------------------------
+# Explanation:
+# **Data Preprocessing Steps:**
+# 1. **Loading the Data**
+#    - Use `pd.read_csv()` to read the dataset.
+#
+# 2. **Exploring the Data**
+#    - Use `.info()` and `.describe()` to get a statistical overview.
+#
+# 3. **Handling Missing Values**
+#    - Identify missing values with `.isnull().sum()`.
+#    - Options to handle:
+#      a) Drop missing values → `dropna()`
+#      b) Fill missing values with:
+#         - Mean (for continuous data)
+#         - Median (if skewed data)
+#         - Mode (for categorical data)
+#
+# 4. **Handling Duplicates**
+#    - Identify duplicates → `duplicated().sum()`
+#    - Remove them → `drop_duplicates()`
+#
+# 5. **Descriptive Statistics**
+#    - `.describe()` for numerical columns.
+#    - `.value_counts()` for categorical columns.
+#
+# 6. **Outlier Detection (IQR Method)**
+#    - Calculate Q1, Q3, and IQR.
+#    - Remove or cap values beyond 1.5 * IQR.
+#
+# 7. **Encoding Categorical Data**
+#    - Convert categorical variables into numeric form using:
+#      - `pd.get_dummies()` for one-hot encoding.
+#
+# ----------------------------------------------------------
+
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ----------------------------------------------------------
+# Step 1: Load the dataset
+# ----------------------------------------------------------
+df = pd.read_csv("melb_data.csv")
+
+# Display first few rows
+print("First 5 Rows of the Dataset:\n", df.head())
+
+# ----------------------------------------------------------
+# Step 2: Explore the dataset
+# ----------------------------------------------------------
+print("\nDataset Information:")
+df.info()
+
+print("\nStatistical Summary of Numerical Columns:")
+print(df.describe())
+
+# ----------------------------------------------------------
+# Step 3: Check for missing values
+# ----------------------------------------------------------
+print("\nMissing Values Count:")
+print(df.isnull().sum())
+
+# Filling missing values
+# Example Strategy:
+# - Continuous data → fill with median
+# - Categorical data → fill with mode
+for column in df.columns:
+    if df[column].dtype == 'object':  # categorical column
+        df[column].fillna(df[column].mode()[0], inplace=True)
+    else:  # numerical column
+        df[column].fillna(df[column].median(), inplace=True)
+
+print("\nMissing Values After Imputation:")
+print(df.isnull().sum())
+
+# ----------------------------------------------------------
+# Step 4: Identify and remove duplicate rows
+# ----------------------------------------------------------
+duplicates = df.duplicated().sum()
+print(f"\nNumber of Duplicate Rows: {duplicates}")
+
+# Remove duplicates
+df = df.drop_duplicates()
+print("Shape After Removing Duplicates:", df.shape)
+
+# ----------------------------------------------------------
+# Step 5: Descriptive statistics
+# ----------------------------------------------------------
+print("\nUpdated Statistical Summary After Cleaning:")
+print(df.describe())
+
+# ----------------------------------------------------------
+# Step 6: Outlier Detection and Treatment (IQR Method)
+# ----------------------------------------------------------
+print("\nDetecting Outliers using IQR Method:")
+
+numeric_columns = df.select_dtypes(include=['int64', 'float64']).columns
+
+for col in numeric_columns:
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+    IQR = Q3 - Q1
+
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # Find outliers
+    outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+
+    print(f"\nColumn: {col}")
+    if not outliers.empty:
+        print(f"Number of Outliers: {outliers.shape[0]}")
+        
+        # Option 1: Remove outliers
+        df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
+    else:
+        print("No outliers detected in this column.")
+
+print("\nShape After Outlier Removal:", df.shape)
+
+# Optional: Boxplot Visualization
+print("\nGenerating Boxplots for Numerical Columns...")
+df[numeric_columns].plot(kind='box', subplots=True, layout=(4, 4), figsize=(14, 10))
+plt.tight_layout()
+plt.show()
+
+# ----------------------------------------------------------
+# Step 7: Encoding categorical variables
+# ----------------------------------------------------------
+# Identify categorical columns
+categorical_columns = df.select_dtypes(include=['object']).columns
+print("\nCategorical Columns:", list(categorical_columns))
+
+# Convert categorical data into numerical using one-hot encoding
+df_encoded = pd.get_dummies(df, columns=categorical_columns, drop_first=True)
+
+print("\nDataFrame After Encoding:")
+print(df_encoded.head())
+
+# Final Shape of Processed Dataset
+print("\nFinal Processed Dataset Shape:", df_encoded.shape)
+
+# ----------------------------------------------------------
+# Summary
+# ----------------------------------------------------------
+# The dataset is now:
+# - Free of missing values
+# - Free of duplicate rows
+# - Outliers treated using IQR method
+# - Categorical variables encoded for ML models
+# ----------------------------------------------------------
